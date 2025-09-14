@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculateur d'Âge Moderne</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          animation: {
+            'fade-in': 'fadeIn 0.5s ease-in-out',
+            'bounce-in': 'bounceIn 0.6s ease-out',
+            'pulse-slow': 'pulse 3s infinite'
+          },
+          keyframes: {
+            fadeIn: {
+              '0%': { opacity: '0', transform: 'translateY(20px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' }
+            },
+            bounceIn: {
+              '0%': { opacity: '0', transform: 'scale(0.3)' },
+              '50%': { transform: 'scale(1.05)' },
+              '100%': { opacity: '1', transform: 'scale(1)' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-purple-400 via-pink-500 to-red-500 flex items-center justify-center p-4">
+  <div class="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl p-8 w-full max-w-md animate-fade-in">
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <div class="text-6xl mb-4 animate-pulse-slow">🎂</div>
+      <h1 class="text-3xl font-bold text-gray-800 mb-2">Calculateur d'Âge</h1>
+      <p class="text-gray-600">Découvrez votre âge exact en quelques clics</p>
+    </div>
+
+    <!-- Date Selection -->
+    <div class="space-y-6">
+      <!-- Day Selection -->
+      <div class="space-y-2">
+        <label for="day" class="block text-sm font-semibold text-gray-700">Jour de naissance</label>
+        <select id="day" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-200 bg-white text-gray-800">
+          <option value="">Sélectionnez le jour</option>
+        </select>
+      </div>
+
+      <!-- Month Selection -->
+      <div class="space-y-2">
+        <label for="month" class="block text-sm font-semibold text-gray-700">Mois de naissance</label>
+        <select id="month" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-200 bg-white text-gray-800">
+          <option value="">Sélectionnez le mois</option>
+        </select>
+      </div>
+
+      <!-- Year Selection -->
+      <div class="space-y-2">
+        <label for="year" class="block text-sm font-semibold text-gray-700">Année de naissance</label>
+        <select id="year" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-200 bg-white text-gray-800">
+          <option value="">Sélectionnez l'année</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Calculate Button -->
+    <button onclick="calculateAge()" class="w-full mt-8 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-purple-300">
+      <span class="flex items-center justify-center space-x-2">
+        <span>✨</span>
+        <span>Calculer mon âge</span>
+        <span>✨</span>
+      </span>
+    </button>
+
+    <!-- Result Display -->
+    <div id="result" class="mt-8 p-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl border-2 border-purple-100 hidden">
+      <div class="text-center">
+        <div class="text-4xl mb-3">🎉</div>
+        <div id="age-text" class="text-xl font-bold text-gray-800 mb-2"></div>
+        <div id="detailed-age" class="text-gray-600"></div>
+        <div class="mt-4 flex justify-center space-x-4 text-sm">
+          <div class="bg-white px-3 py-2 rounded-lg shadow">
+            <div id="total-days" class="font-bold text-purple-600"></div>
+            <div class="text-gray-500">jours vécus</div>
+          </div>
+          <div class="bg-white px-3 py-2 rounded-lg shadow">
+            <div id="next-birthday" class="font-bold text-pink-600"></div>
+            <div class="text-gray-500">jusqu'au prochain</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Noms des mois en français
+    const monthNames = [
+      "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
+      "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
+    ];
+
+    // Remplir les jours (1-31)
+    const daySelect = document.getElementById("day");
+    for(let d = 1; d <= 31; d++) {
+      const opt = document.createElement("option");
+      opt.value = d;
+      opt.textContent = d;
+      daySelect.appendChild(opt);
+    }
+
+    // Remplir les mois avec noms
+    const monthSelect = document.getElementById("month");
+    monthNames.forEach((monthName, index) => {
+      const opt = document.createElement("option");
+      opt.value = index + 1;
+      opt.textContent = monthName;
+      monthSelect.appendChild(opt);
+    });
+
+    // Remplir les années (année actuelle -> 1900)
+    const yearSelect = document.getElementById("year");
+    const currentYear = new Date().getFullYear();
+    for(let y = currentYear; y >= 1900; y--) {
+      const opt = document.createElement("option");
+      opt.value = y;
+      opt.textContent = y;
+      yearSelect.appendChild(opt);
+    }
+
+    // Fonction pour calculer l'âge
+    function calculateAge() {
+      const day = parseInt(daySelect.value);
+      const month = parseInt(monthSelect.value);
+      const year = parseInt(yearSelect.value);
+
+      // Validation
+      if (!day || !month || !year) {
+        alert("Veuillez sélectionner une date complète !");
+        return;
+      }
+
+      const birthDate = new Date(year, month - 1, day);
+      const today = new Date();
+
+      // Vérifier si la date est valide
+      if (birthDate > today) {
+        alert("La date de naissance ne peut pas être dans le futur !");
+        return;
+      }
+
+      // Calcul de l'âge précis
+      let ageYears = today.getFullYear() - birthDate.getFullYear();
+      let ageMonths = today.getMonth() - birthDate.getMonth();
+      let ageDays = today.getDate() - birthDate.getDate();
+
+      if (ageDays < 0) {
+        ageMonths--;
+        const lastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+        ageDays += lastMonth.getDate();
+      }
+
+      if (ageMonths < 0) {
+        ageYears--;
+        ageMonths += 12;
+      }
+
+      // Calcul des jours totaux vécus
+      const totalDays = Math.floor((today - birthDate) / (1000 * 60 * 60 * 24));
+
+      // Calcul des jours jusqu'au prochain anniversaire
+      let nextBirthday = new Date(today.getFullYear(), month - 1, day);
+      if (nextBirthday < today) {
+        nextBirthday.setFullYear(today.getFullYear() + 1);
+      }
+      const daysUntilBirthday = Math.ceil((nextBirthday - today) / (1000 * 60 * 60 * 24));
+
+      // Affichage des résultats avec animation
+      const resultDiv = document.getElementById("result");
+      const ageText = document.getElementById("age-text");
+      const detailedAge = document.getElementById("detailed-age");
+      const totalDaysSpan = document.getElementById("total-days");
+      const nextBirthdaySpan = document.getElementById("next-birthday");
+
+      ageText.textContent = `Vous avez ${ageYears} ans !`;
+      detailedAge.textContent = `Plus précisément : ${ageYears} ans, ${ageMonths} mois et ${ageDays} jours`;
+      totalDaysSpan.textContent = totalDays.toLocaleString();
+      nextBirthdaySpan.textContent = daysUntilBirthday === 0 ? "Aujourd'hui !" : `${daysUntilBirthday} jours`;
+
+      // Animation d'apparition
+      resultDiv.classList.remove("hidden");
+      resultDiv.classList.add("animate-bounce-in");
+      
+      // Scroll vers le résultat
+      setTimeout(() => {
+        resultDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 300);
+    }
+
+    // Validation en temps réel des dates
+    function validateDate() {
+      const day = parseInt(daySelect.value);
+      const month = parseInt(monthSelect.value);
+      const year = parseInt(yearSelect.value);
+
+      if (day && month && year) {
+        const daysInMonth = new Date(year, month, 0).getDate();
+        if (day > daysInMonth) {
+          daySelect.value = "";
+          alert(`Le mois sélectionné n'a que ${daysInMonth} jours !`);
+        }
+      }
+    }
+
+    // Ajouter les événements de validation
+    daySelect.addEventListener('change', validateDate);
+    monthSelect.addEventListener('change', validateDate);
+    yearSelect.addEventListener('change', validateDate);
+  </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97f00040324c95f4',t:'MTc1Nzg1NDEzMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
